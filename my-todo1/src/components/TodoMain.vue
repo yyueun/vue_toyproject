@@ -4,12 +4,18 @@
     <main>
       <div class="todos">
         <div class="write">
-          <input type="text"   v-model="addItemText"/>
+          <input
+          ref="writeArea"  
+          type="text"   
+          v-model="addItemText" 
+          @keyup.enter="addItem"/>
           <button class="btn add" @click="addItem()" >Add</button>
         </div>
         <ul class="list">
-          <li v-for ="(todo, i) in todos" :key="todo.text">
-            <i  :class="[todo.state ==='yet' ? 'far':'fas', 'fa-check-square']"></i>  <!---삼항연산자 사용,class앞 바인딩!! -->
+          <li v-for ="(todo, i) in todos" :key="i">
+            <i
+            @click ="checkItem(i)"  
+            :class="[todo.state ==='yet' ? 'far':'fas', 'fa-check-square']"></i>  <!---삼항연산자 사용,class앞 바인딩!! -->
             <!-- done일때 fas, yet일 때 far -->
             <span>
               {{ todo.text }}
@@ -40,11 +46,21 @@ export default {
     },
     methods: {
         addItem(){
+            if (this.addItemText ==='') return; 
             this.todos.push({text:this.addItemText, state:'yet'}) //input태그로 받아온 값을 todos에 push
             //생길땐 yet으로 해야함 --글쓴내용이랑 같이 엔터나 add를 하면 등록하게 됨 
+            this.addItemText='';
             
+            },
+        checkItem(i){
+            this.todos[i].state = 'done'
+
         }
-    }
+        },
+        mounted(){
+            
+            this.$refs.writeArea.focus() //인풋창 깜빡이게 하기 
+        }
     }
 
 
