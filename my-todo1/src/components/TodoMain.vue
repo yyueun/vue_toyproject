@@ -1,6 +1,19 @@
 <template>
     <div class="page">
-    <header><h1>Vue Fire todo1</h1></header>
+    <header><h1>
+        Vue Fire todo1
+        <span class="pie">
+          <svg viewBox="0 0 64 64">
+          <circle class="pie" r="32" cx="32" cy="32" style="stroke-width: 64;"></circle>
+          <circle class="slice" r="32" cx="32" cy="32" 
+          :style= "{
+            strokeWidth: 64, 
+            strokeDasharray: totalTodo + ', 201', 
+            transition:'all 0.3s linear'
+          }"></circle>
+        </svg>
+        </span>
+    </h1></header>
     <main>
     <div class="todos">
     <transition name="fade">
@@ -11,7 +24,7 @@
           type="text"   
           v-model="addItemText" 
           @keyup.enter="addItem"/>
-          <button class="btn add" @click="addItem()">Add</button>
+          <button class="btn add" @click="addItem">Add</button>
         </div>
         <!-- 수정 -->
         <div class="write edit" v-else key="edit">
@@ -56,8 +69,17 @@ export default {
         ediItemText:'',
         crrEditItem:'', //몇번째꺼를 수정하는지 글의 인덱스 저장
         todos:[]
-    }
-
+        }
+    },
+    computed:{
+        totalTodo(){
+            //done한 숫자 개수 세기 
+            let totalNum = 0
+            this.todos.forEach(item=>{
+                if (item.state ==='done') totalNum++;
+            });
+            return (totalNum / this.todos.length) * 201
+        }
     },
     methods: {
         addItem(){
@@ -65,7 +87,8 @@ export default {
             //지우기 위한 준비 
             db.collection('todos').add({
                 text:this.addItemText, 
-                state:'yet'
+                state:'yet',
+                createdAt: new Date(), // 생성시 날짜데이터 추가 
             }).then(sn=> {
                 db.collection('todos').doc(sn.id).update({
                     id: sn.id 
@@ -78,12 +101,15 @@ export default {
             
             },
 
-            //체크박스 선택,취소 
+            //체크박스 선택,취소 *****
         checkItem(i){
             if(this.todos[i].state === 'yet'){
-                this.todos[i].state = 'done'
+                db.collection('todos').doc(this.todos[i].id).update({state:'done'}) //db에 state업데이트
+
+                // this.todos[i].state = 'done'
             }else{
-                this.todos[i].state ='yet'
+                // this.todos[i].state ='yet'
+                db.collection('todos').doc(this.todos[i].id).update({state:'yet'})
             }
 
         },
@@ -116,17 +142,17 @@ export default {
         }
         },
         mounted(){
-            db.collection('todos').get().then((result) => {
-                 result.forEach((doc)=>{
-                    console.log(doc.data())
-                    this.todos.push(doc.data());
-    })
-});
-            
             this.$refs.writeArea.focus() //인풋창 깜빡이게 하기 
+//             db.collection('todos').get().then((result) => {
+//                  result.forEach((doc)=>{
+//                     console.log(doc.data())
+//                     this.todos.push(doc.data());
+//     })
+// });
+        
         },
-        firestore:{
-            todos: db.collection('todos') //db에서 쓰는 이름과 같아야함.
+        firestore:{ //vuefire
+            todos: db.collection('todos').orderBy('createdAt', 'desc') //db에서 쓰는 이름과 같아야함. firebase에서 시간순으로 가져오기/
             
         }
     }

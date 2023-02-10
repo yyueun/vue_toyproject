@@ -66,5 +66,22 @@ h1 {font-family: 'Merriweather', serif;}
   opacity: 0;
 }
 
+/* pie */
+.pie svg {
+    overflow: hidden; 
+    border-radius: 50%; 
+    transform: rotate(-90deg); 
+    vertical-align:-3px;
+}
+.pie {width:30px; display:inline-block; }
+.pie circle.pie {
+    fill: #fff0;
+    stroke: #96d2b1;
+}
+.pie circle.slice {
+    fill: #fff0;
+    stroke: #2da562;
+}
+
 
 </style>
